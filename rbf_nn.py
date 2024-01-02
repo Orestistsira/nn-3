@@ -1,6 +1,7 @@
 import numpy as np
 from sklearn.cluster import KMeans
 from sklearn.metrics import accuracy_score
+from sklearn.preprocessing import StandardScaler
 
 import utils
 
@@ -12,9 +13,10 @@ class RBFNN:
         self.output_dim = output_dim
         self.centers = None
         self.weights = np.random.rand(self.hidden_dim, self.output_dim) - 0.5
+        # self.weights = np.random.uniform(-1, 1, size=(self.hidden_dim, self.output_dim))
 
-    def gaussian_rbf(self, x, center, sigma=1.0):
-        return np.exp(-np.linalg.norm(x - center) ** 2 / (2 * sigma ** 2))
+    def gaussian_rbf(self, x, center, gamma=0.001):
+        return np.exp(-gamma * np.linalg.norm(x - center) ** 2)
 
     def calculate_rbf_layer(self, x):
         rbf_layer = np.zeros((x.shape[0], self.hidden_dim))
@@ -78,13 +80,18 @@ y_train = np.concatenate([y_train_1, y_train_2, y_train_3, y_train_4, y_train_5]
 
 x_test, y_test = utils.unpickle("cifar-10/test_batch")
 
+# Standardize the data (important for RBFN)
+scaler = StandardScaler()
+x_train = scaler.fit_transform(x_train)
+x_test = scaler.transform(x_test)
+
 input_dim = 3072
-hidden_dim = 50  # Number of RBF neurons
+hidden_dim = 20  # Number of RBF neurons
 output_dim = 10
 
 rbfnn = RBFNN(input_dim, hidden_dim, output_dim)
 print('Training...')
-rbfnn.fit(x_train, y_train, learning_rate=0.01, epochs=10000)
+rbfnn.fit(x_train, y_train, learning_rate=0.001, epochs=100)
 
 # Make predictions on test data
 y_pred = rbfnn.predict(x_test)
