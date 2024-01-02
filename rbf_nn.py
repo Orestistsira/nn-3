@@ -11,7 +11,7 @@ class RBFNN:
         self.hidden_dim = hidden_dim
         self.output_dim = output_dim
         self.centers = None
-        self.weights = np.random.rand(self.hidden_dim, self.output_dim)
+        self.weights = np.random.rand(self.hidden_dim, self.output_dim) - 0.5
 
     def gaussian_rbf(self, x, center, sigma=1.0):
         return np.exp(-np.linalg.norm(x - center) ** 2 / (2 * sigma ** 2))
@@ -25,24 +25,27 @@ class RBFNN:
 
         return rbf_layer
 
-    def fit(self, x, y, num_clusters=10, learning_rate=0.01, epochs=100):
+    def kmeans(self, x):
         # Use KMeans to initialize RBF centers
-        kmeans = KMeans(n_clusters=num_clusters, n_init='auto')
+        kmeans = KMeans(n_clusters=self.hidden_dim, n_init='auto')
         kmeans.fit(x)
         self.centers = kmeans.cluster_centers_
 
+    def fit(self, x, y, learning_rate=0.01, epochs=100):
+        self.kmeans(x)
+
         # Calculate RBF layer
-        rbf_layer = self.calculate_rbf_layer(x)
+        rbf_layer_output = self.calculate_rbf_layer(x)
 
         # Training loop
         for epoch in range(epochs):
             # Forward pass
-            hidden_output = np.dot(rbf_layer, self.weights)
-            output = self.softmax(hidden_output)
+            output = np.dot(rbf_layer_output, self.weights)
+            output = self.softmax(output)
 
             # Backward pass
             error = output - y
-            gradient = np.dot(rbf_layer.T, error)
+            gradient = np.dot(rbf_layer_output.T, error)
 
             # Update weights
             self.weights -= learning_rate * gradient
@@ -54,8 +57,8 @@ class RBFNN:
             print(f"Epoch {epoch + 1}/{epochs}, Training Accuracy: {accuracy}, Loss: {loss}")
 
     def predict(self, x):
-        rbf_layer = self.calculate_rbf_layer(x)
-        hidden_output = np.dot(rbf_layer, self.weights)
+        rbf_layer_output = self.calculate_rbf_layer(x)
+        hidden_output = np.dot(rbf_layer_output, self.weights)
         output = self.softmax(hidden_output)
         return output
 
@@ -76,16 +79,16 @@ y_train = np.concatenate([y_train_1, y_train_2, y_train_3, y_train_4, y_train_5]
 x_test, y_test = utils.unpickle("cifar-10/test_batch")
 
 input_dim = 3072
-hidden_dim = 10  # Number of RBF neurons
+hidden_dim = 50  # Number of RBF neurons
 output_dim = 10
 
 rbfnn = RBFNN(input_dim, hidden_dim, output_dim)
 print('Training...')
-rbfnn.fit(x_train, y_train, learning_rate=0.01, epochs=100)
+rbfnn.fit(x_train, y_train, learning_rate=0.01, epochs=10000)
 
-# # Make predictions on test data
-# y_pred = rbfnn.predict(x_test)
-#
-# # Evaluate the accuracy
-# accuracy = accuracy_score(y_test, y_pred)
-# print(f'Test Accuracy: {accuracy:.2f}')
+# Make predictions on test data
+y_pred = rbfnn.predict(x_test)
+
+# Evaluate the accuracy
+accuracy = accuracy_score(np.argmax(y_test, axis=1), np.argmax(y_pred, axis=1))
+print(f'Test Accuracy: {accuracy:.2f}')
