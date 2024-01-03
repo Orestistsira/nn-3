@@ -29,10 +29,10 @@ class RBFNN:
         # Use KMeans to initialize RBF centers
         kmeans = KMeans(n_clusters=self.hidden_dim, n_init='auto')
         kmeans.fit(x)
-        self.centers = kmeans.cluster_centers_
+        return kmeans.cluster_centers_
 
     def fit(self, x, y, learning_rate=0.01, epochs=100, gamma=0.001):
-        self.kmeans(x)
+        self.centers = self.kmeans(x)
         self.gamma = gamma
 
         # Calculate RBF layer
