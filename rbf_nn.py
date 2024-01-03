@@ -4,11 +4,11 @@ from sklearn.metrics import accuracy_score
 
 
 class RBFNN:
-    def __init__(self, input_dim, hidden_dim, output_dim):
+    def __init__(self, input_dim, hidden_dim, output_dim, gamma=0.001):
         self.input_dim = input_dim
         self.hidden_dim = hidden_dim
         self.output_dim = output_dim
-        self.gamma = 1.0
+        self.gamma = gamma
         self.centers = None
         self.weights = np.random.rand(self.hidden_dim, self.output_dim) - 0.5
         # self.weights = np.random.uniform(-1, 1, size=(self.hidden_dim, self.output_dim))
@@ -31,9 +31,8 @@ class RBFNN:
         kmeans.fit(x)
         return kmeans.cluster_centers_
 
-    def fit(self, x, y, learning_rate=0.01, epochs=100, gamma=0.001):
+    def fit(self, x, y, learning_rate=0.01, epochs=100):
         self.centers = self.kmeans(x)
-        self.gamma = gamma
 
         # Calculate RBF layer
         rbf_layer_output = self.calculate_rbf_layer(x)

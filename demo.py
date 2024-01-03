@@ -27,9 +27,9 @@ output_dim = 10
 
 gamma = 0.001
 
-rbfnn = RBFNN(input_dim, hidden_dim, output_dim)
+rbfnn = RBFNN(input_dim, hidden_dim, output_dim, gamma=gamma)
 print('Training...')
-rbfnn.fit(x_train, y_train, learning_rate=0.001, epochs=100, gamma=gamma)
+rbfnn.fit(x_train, y_train, learning_rate=0.001, epochs=100)
 
 # Make predictions on test data
 y_pred = rbfnn.predict(x_test)
