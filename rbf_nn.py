@@ -27,14 +27,26 @@ class RBFNN:
 
         return rbf_layer
 
+    def rand_centers(self, x):
+        center_indices = np.random.choice(x.shape[0], self.hidden_dim, replace=False)
+        return x[center_indices]
+
     def kmeans(self, x):
         # Use KMeans to initialize RBF centers
         kmeans = KMeans(n_clusters=self.hidden_dim, n_init='auto')
         kmeans.fit(x)
         return kmeans.cluster_centers_
 
-    def fit(self, x, y, learning_rate=0.01, epochs=100, validation_data=()):
-        self.centers = self.kmeans(x)
+    def init_centers(self, x, centers_alg):
+        if centers_alg == 'kmeans':
+            return self.kmeans(x)
+        elif centers_alg == 'rand':
+            return self.rand_centers(x)
+        else:
+            raise ValueError(f'There is no centers init algorithm = {centers_alg}. Please choose "kmeans" or "rand"')
+
+    def fit(self, x, y, learning_rate=0.01, epochs=100, validation_data=(), centers_alg='kmeans'):
+        self.centers = self.init_centers(x, centers_alg)
 
         # Calculate RBF layer
         rbf_layer_output = self.calculate_rbf_layer(x)

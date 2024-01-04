@@ -33,7 +33,7 @@ gamma = 0.001
 rbfnn = RBFNN(input_dim, hidden_dim, output_dim, gamma=gamma)
 print('Training...')
 start_time = time.time()
-rbfnn.fit(x_train, y_train, learning_rate=0.001, epochs=100)
+rbfnn.fit(x_train, y_train, learning_rate=0.001, epochs=100, validation_data=(x_test, y_test))
 print('Model successfully trained in %.2fs' % (time.time() - start_time))
 
 # Make predictions on test data
