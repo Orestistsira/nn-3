@@ -51,6 +51,10 @@ class RBFNN:
         # Calculate RBF layer
         rbf_layer_output = self.calculate_rbf_layer(x)
 
+        val_rbf_layer_output = None
+        if validation_data:
+            val_rbf_layer_output = self.calculate_rbf_layer(validation_data[0])
+
         history = History()
         history.hyperparams = {
             'hid_layers_size': self.hidden_dim,
@@ -81,13 +85,14 @@ class RBFNN:
 
             test_acc = 0
             if validation_data:
-                val_output = self.predict(validation_data[0])
+                hidden_output = np.dot(val_rbf_layer_output, self.weights)
+                val_output = self.softmax(hidden_output)
                 test_acc = accuracy_score(np.argmax(validation_data[1], axis=1), np.argmax(val_output, axis=1))
                 history.test_acc_history.append(test_acc)
 
             # Print epoch stats
-            print(f"Epoch {epoch + 1}/{epochs}, Training Accuracy: {train_acc:.2f}, Test Accuracy: {test_acc:.2f}, "
-                  f"Loss: {loss:.2f}")
+            # print(f"Epoch {epoch + 1}/{epochs}, Training Accuracy: {train_acc:.2f}, Test Accuracy: {test_acc:.2f}, "
+                  # f"Loss: {loss:.2f}")
 
         history.plot_training_history()
 
