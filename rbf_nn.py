@@ -2,6 +2,8 @@ import numpy as np
 from sklearn.cluster import KMeans
 from sklearn.metrics import accuracy_score
 
+from history import History
+
 
 class RBFNN:
     def __init__(self, input_dim, hidden_dim, output_dim, gamma=0.001):
@@ -31,11 +33,18 @@ class RBFNN:
         kmeans.fit(x)
         return kmeans.cluster_centers_
 
-    def fit(self, x, y, learning_rate=0.01, epochs=100):
+    def fit(self, x, y, learning_rate=0.01, epochs=100, validation_data=()):
         self.centers = self.kmeans(x)
 
         # Calculate RBF layer
         rbf_layer_output = self.calculate_rbf_layer(x)
+
+        history = History()
+        history.hyperparams = {
+            'hid_layers_size': self.hidden_dim,
+            'learn_rate': learning_rate,
+            'gamma': self.gamma
+        }
 
         # Training loop
         for epoch in range(epochs):
@@ -50,11 +59,25 @@ class RBFNN:
             # Update weights
             self.weights -= learning_rate * gradient
 
-            # Print loss for monitoring
+            # Calculate cross-entropy loss
             loss = np.mean(-np.sum(y * np.log(output), axis=1))
+            history.loss_history.append(loss)
+
             # Calculate accuracy
-            accuracy = accuracy_score(np.argmax(y, axis=1), np.argmax(output, axis=1))
-            print(f"Epoch {epoch + 1}/{epochs}, Training Accuracy: {accuracy}, Loss: {loss}")
+            train_acc = accuracy_score(np.argmax(y, axis=1), np.argmax(output, axis=1))
+            history.train_acc_history.append(train_acc)
+
+            test_acc = 0
+            if validation_data:
+                val_output = self.predict(validation_data[0])
+                test_acc = accuracy_score(np.argmax(validation_data[1], axis=1), np.argmax(val_output, axis=1))
+                history.test_acc_history.append(test_acc)
+
+            # Print epoch stats
+            print(f"Epoch {epoch + 1}/{epochs}, Training Accuracy: {train_acc:.2f}, Test Accuracy: {test_acc:.2f}, "
+                  f"Loss: {loss:.2f}")
+
+        history.plot_training_history()
 
     def predict(self, x):
         rbf_layer_output = self.calculate_rbf_layer(x)
