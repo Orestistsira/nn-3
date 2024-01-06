@@ -1,7 +1,6 @@
 import time
 
 import numpy as np
-import itertools
 from sklearn.metrics import accuracy_score
 from sklearn.preprocessing import StandardScaler
 
@@ -25,7 +24,7 @@ x_train = scaler.fit_transform(x_train)
 x_test = scaler.transform(x_test)
 
 input_dim = 3072
-hidden_dim = 10  # Number of RBF neurons
+hidden_dim = 200  # Number of RBF neurons
 output_dim = 10
 
 gamma = 0.001
@@ -33,7 +32,7 @@ gamma = 0.001
 rbfnn = RBFNN(input_dim, hidden_dim, output_dim, gamma=gamma)
 print('Training...')
 start_time = time.time()
-rbfnn.fit(x_train, y_train, learning_rate=0.001, epochs=100, validation_data=(x_test, y_test))
+rbfnn.fit(x_train, y_train, learning_rate=0.0001, epochs=200, validation_data=(x_test, y_test))
 print('Model successfully trained in %.2fs' % (time.time() - start_time))
 
 # Make predictions on test data
