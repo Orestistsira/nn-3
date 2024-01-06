@@ -91,8 +91,8 @@ class RBFNN:
                 history.test_acc_history.append(test_acc)
 
             # Print epoch stats
-            # print(f"Epoch {epoch + 1}/{epochs}, Training Accuracy: {train_acc:.2f}, Test Accuracy: {test_acc:.2f}, "
-                  # f"Loss: {loss:.2f}")
+            print(f"Epoch {epoch + 1}/{epochs}, Training Accuracy: {train_acc:.2f}, Test Accuracy: {test_acc:.2f}, "
+                  f"Loss: {loss:.2f}")
 
         history.plot_training_history()
 
